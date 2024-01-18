@@ -6,13 +6,6 @@ declare global {
     wasm: WebAssembly.WebAssemblyInstantiatedSource;
   }
 }
-interface MyExports {
-  memory: WebAssembly.Memory;
-  encryptRailFence: (ptr: number, len: number) => number;
-}
-
-function encryptRailFence() {}
-function decryptRailFence() {}
 
 function readStringFromMemory(memory: Uint8Array, pointer: number): string {
   const utf8decoder = new TextDecoder("utf-8");

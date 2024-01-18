@@ -10,28 +10,76 @@ extern "C"
    void freeMemory(int ptr);
 }
 
-int main()
-{
-   return 25;
-}
-
 const char *decryptRailFence(int ptr, int len, int key)
 {
    char *buffer = reinterpret_cast<char *>(ptr);
    string str(buffer, len);
 
    vector<vector<char>> rails(key);
-
    int rail_number = 0;
+   bool down = true;
 
-   string joined = "";
+   vector<int> rail_lengths(key, 0);
 
-   for (int i = 0; i < key; i++)
+   for (int i = 0; i < len; i++)
    {
-      joined += string(rails[i].begin(), rails[i].end());
+      rail_lengths[rail_number]++;
+
+      if (rail_number == key - 1)
+      {
+         down = false;
+      }
+      else if (rail_number == 0)
+      {
+         down = true;
+      }
+
+      if (down)
+      {
+         rail_number++;
+      }
+      else
+      {
+         rail_number--;
+      }
    }
 
-   // Allocate memory in the WebAssembly module
+   int index = 0;
+   for (int i = 0; i < key; i++)
+   {
+      for (int j = 0; j < rail_lengths[i]; j++)
+      {
+         rails[i].push_back(str[index++]);
+      }
+   }
+
+   string joined;
+   rail_number = 0;
+   down = true;
+   for (int i = 0; i < len; i++)
+   {
+      joined += rails[rail_number].front();
+      rails[rail_number].erase(rails[rail_number].begin());
+
+      if (rail_number == key - 1)
+      {
+         down = false;
+      }
+      else if (rail_number == 0)
+      {
+         down = true;
+      }
+
+      if (down)
+      {
+         rail_number++;
+      }
+      else
+      {
+         rail_number--;
+      }
+   }
+
    char *result = (char *)malloc((joined.length() + 1) * sizeof(char));
    strcpy(result, joined.c_str());
 
@@ -72,26 +120,19 @@ const char *encryptRailFence(int ptr, int len, int key)
    }
 
    string joined = "";
-   // for (int i = 0; i < rails.size(); i++)
-   // {
-   //    for (int j = 0; j < rails[i].size(); j++)
-   //    {
-   //       joined += rails[i][j];
-   //    }
-   // }
-   for (int i = 0; i < key; i++)
+   for (int i = 0; i < rails.size(); i++)
    {
-      joined += string(rails[i].begin(), rails[i].end());
+      for (int j = 0; j < rails[i].size(); j++)
+      {
+         joined += rails[i][j];
+      }
    }
-
-   // Allocate memory in the WebAssembly module
    char *result = (char *)malloc((joined.length() + 1) * sizeof(char));
    strcpy(result, joined.c_str());
 
    return result;
 }
 
-// Implement the freeMemory function
 void freeMemory(int ptr)
 {
    free(reinterpret_cast<void *>(ptr));
